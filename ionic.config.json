@@ -1,0 +1,7 @@
+{
+  "name": "TopicosP1Frontend",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
