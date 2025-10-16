@@ -1,18 +1,21 @@
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, Component, inject, OnInit, signal } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { PollingService } from './polling-service';
 import { takeWhile } from 'rxjs';
 import { timeout, retry } from 'rxjs/operators';
 import Prando from 'prando';
+import { HistoryComponent } from "./components/history/history";
 
-const API_URL = 'http://34.29.81.225/api/';
+const API_URL = 'http://34.149.69.105/api/';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
+  imports: [HistoryComponent]
 })
 export class App implements AfterViewInit{
+  @ViewChild(HistoryComponent) historyComponent!: HistoryComponent;
   protected readonly title = signal('TopicosP1Frontend');
   private http = inject(HttpClient)
   private polling = inject(PollingService)
@@ -60,7 +63,7 @@ export class App implements AfterViewInit{
         }
         this.data = [];
         this.displayedData = [];
-        this.polling.pollData(`${API_URL}Admin/Transaction/${token}`, 2000)
+        this.polling.pollData(`${API_URL}Students/Status/${token}`, 2000)
         .pipe(takeWhile(_ => !finished))
         .subscribe(
           (response: any) => {
@@ -108,42 +111,25 @@ export class App implements AfterViewInit{
         "groupIds": this.selectedgroups
       };
       (payload as any).requestId = await sha256HashBrowser(JSON.stringify(payload));
-      console.log(payload);
     this.http.post(`${API_URL}Inscriptions`, payload)
     .pipe(timeout(10000), retry(2))
     .subscribe(
       async (response: any) => {
         token = response.token;
         this.submissionStatus = response.status;
-        if (response.status !== 'PENDING') {
-          if (response.status === 'ACCEPTED') {
-            this.submissionResponse = response.result;
-            finished = true;
-            this.isPostButtonDisabled = false;
+        if (response.status === 'ACCEPTED')
+          this.submissionResponse = response.result;
+        finished = true;
+        this.submissionStatus = response.status;
+        this.isPostButtonDisabled = false;
+        let groups = '';
+        for (const groupId of this.selectedgroups) {
+          const group = this.data.flatMap(subject => subject.groups).find((g: any) => g.id === groupId);
+          if (group) {
+            groups += `${group.subject.code}-${group.code}, `;
           }
-          this.submissionStatus = response.status;
-          this.isPostButtonDisabled = false;
-          return;
         }
-        this.polling.pollData(`${API_URL}Admin/Transaction/${token}`, 2000)
-        .pipe(takeWhile(_ => !finished))
-        .subscribe(
-          (response: any) => {
-            console.log(response.result);
-            this.submissionResponse = response.result;
-            this.submissionStatus = response.status;
-            if (response.status !== 'PENDING') {
-              this.isPostButtonDisabled = false;
-              finished = true;
-            }
-          },
-          (_) => {
-            this.submissionStatus = 'ERROR';
-            this.submissionResponse = '';
-            this.isPostButtonDisabled = false;
-            finished = true;
-          }
-        )
+        this.historyComponent.addSubmission({token: token, status: 'PENDING', timestamp: new Date().toLocaleString(), details: groups.slice(0, -2)});
       },
       (_) => {
         this.submissionStatus = 'ERROR';
@@ -157,7 +143,6 @@ export class App implements AfterViewInit{
   updateGroup(id: number, checked: boolean) {
     if (checked) this.selectedgroups.push(id);
     else this.selectedgroups = this.selectedgroups.filter(_ => _ != id);
-    console.log(this.selectedgroups);
   }
 
   checkSlot(start: string, end: string, day: string): any {
@@ -221,7 +206,6 @@ export class App implements AfterViewInit{
   generateRandomPastelColor(input: string): string {
     let rng = new Prando(input);
     const hash = rng.next();
-    console.log(hash);
     const hue = Math.floor(hash * 361);
     const saturation = Math.floor(hash * 31) + 40;
     const lightness = Math.floor(hash * 21) + 70;
@@ -234,6 +218,27 @@ export class App implements AfterViewInit{
     this.displayedData = [];
     this.statustext = '';
     this.startPolling();
+  }
+
+  isGroupDisabled(id: number, subject: any): boolean {
+    if (this.selectedgroups.includes(id)) return false;
+    const procgroup = this.data.flatMap(subject => subject.groups).find((g: any) => g.id === id);
+    if (subject.groups.some((g: any) => this.selectedgroups.includes(g.id))) return true;
+    const timeslots = [];
+    for (const gid of this.selectedgroups) {
+      timeslots.push(...this.data.flatMap(subject => subject.groups).find((g: any) => g.id === gid)?.timeslots || []);
+    }
+    for (const slot of procgroup.timeslots) {
+      for (const selected of timeslots) {
+        if (this.formatDay(slot.day) === this.formatDay(selected.day) && (
+          (this.formatForComparison(slot.startTime) === this.formatForComparison(selected.startTime) && this.formatForComparison(slot.endTime) > this.formatForComparison(selected.endTime)) ||
+          (this.formatForComparison(slot.startTime) < this.formatForComparison(selected.endTime) && this.formatForComparison(slot.startTime) > this.formatForComparison(selected.startTime)) ||
+          (this.formatForComparison(slot.endTime) < this.formatForComparison(selected.endTime) && this.formatForComparison(slot.endTime) > this.formatForComparison(selected.startTime)))) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
 

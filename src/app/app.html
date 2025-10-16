@@ -4,6 +4,7 @@
   <div
     style="display:flex; justify-content:space-between; align-items:center; padding:1rem 2rem; background-color:white; border-bottom:1px solid #e2e8f0;">
     <h1 style="font-size:1.5rem; color:#0f172a; margin:0;">Inscripción UAGRM</h1>
+    <app-history></app-history>
   </div>
 
   <div style="display:flex; flex:1; padding:1.5rem; gap:2rem; flex-direction: row; flex-wrap: wrap;">
@@ -13,7 +14,7 @@
 
       @if (showingSubmitDialog) {
         <div style="width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;">
-        @if (submissionStatus == 'PENDING' || submissionStatus == 'CONNECTING') {
+        @if (submissionStatus == 'CONNECTING') {
             <div class="spinner-border" style="width: 5rem; height: 5rem;" role="status"></div>
             <p style="margin-top: 1rem; font-size: 1.25rem; font-weight: 500;">Enviando inscripción...</p>
         } @else {
@@ -38,6 +39,10 @@
         @if ((submissionStatus == 'ACCEPTED' && submissionResponse.value.result.groups.length === 0) || submissionStatus == 'REJECTED') {
           <p style="margin-top: 1rem; font-size: 1.25rem; font-weight: 500;">¡Error de inscripción!</p>
           <p style="margin-top: 1rem; font-size: 1rem; font-weight: 400;">No se pudo inscribir ningún grupo.</p>
+        }
+        @if (submissionStatus == 'PENDING') {
+          <p style="margin-top: 1rem; font-size: 1.25rem; font-weight: 500;">¡Inscripción enviada!</p>
+          <p style="margin-top: 1rem; font-size: 1rem; font-weight: 400;">Puedes revisar tus inscripciones pendientes <b><u (click)="historyComponent.expand()">aquí.</u></b></p>
         }
         @if (submissionStatus == 'ERROR') {
           <p style="margin-top: 1rem; font-size: 1.25rem; font-weight: 500;">No se puede conectar al servidor.</p>
@@ -78,10 +83,11 @@
                 <p style="color:#64748b;">No hay grupos para inscribir</p>
                 } @else {
                 @for (group of subject.groups; track $index) {
-                <div
-                  style="display:flex; justify-content:space-between; align-items:center; background-color:#f1f5f9; border-radius:0.5rem; padding:0.5rem 1rem; margin-bottom:0.5rem;">
-                  <label style="display: flex; flex-direction: row; padding-right: 0.5rem; border-right: solid lightgray 1px;;"><input (change)="updateGroup(group.id, $event.target.checked)" type="checkbox"
-                      style="transform:scale(1.2); padding-right:0.5rem;">{{"&nbsp;&nbsp;" + group.code}}</label>
+                <div [style.background-color]="isGroupDisabled(group.id, subject) ? 'lightgray' : '#f1f5f9'" style="display:flex; justify-content:space-between; align-items:center; border-radius:0.5rem; padding:0.5rem 1rem; margin-bottom:0.5rem;">
+                  <label style="display: flex; flex-direction: row; padding-right: 0.5rem; border-right: solid lightgray 1px;">
+                    <input [disabled]="isGroupDisabled(group.id, subject)" (change)="updateGroup(group.id, $event.target.checked)" type="checkbox"style="transform:scale(1.2); padding-right:0.5rem;">
+                    {{"&nbsp;&nbsp;" + group.code}}
+                    </label>
                   <span style="padding-left: 0.5rem; padding-right: 0.5rem;">{{group.teacher.firstName}} {{group.teacher.lastName}}</span>
                   <span style="text-align: end; padding-left: 0.5rem; padding-right: 0.5rem; border-left: solid lightgrey 1px;">
                     @for (timeslot of group.timeslots; track $index) {
