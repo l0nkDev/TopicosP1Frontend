@@ -1,0 +1,33 @@
+    <div
+      style="flex:1.2; background-color:white; border-radius:1rem; box-shadow:0 2px 6px rgba(0,0,0,0.05); padding:1rem 1.5rem; display:flex; flex-direction:column; justify-content:space-between;">
+      <div>
+        <div class="table-responsive" style="overflow-y: scroll; overflow-x: scroll; max-height: calc(100vh - 200px); min-width: none;">
+          <table class="table" style="text-align:center;">
+            <thead>
+              <tr>
+                <th style="border:1px solid #e2e8f0;">H</th>
+                @for (day of ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa"]; track $index) {
+                  <th style="border:1px solid #e2e8f0;">{{day}}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (slot of TIME_SLOTS; track $index) {
+                <tr>
+                  <td style="border:1px solid #e2e8f0;">{{slot.start}}-{{slot.end}}</td>
+                  @for (day of ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa"]; track $index) {
+                      @if (checkSlot(slot.start, slot.end, day) != null) {
+                    <td [style.background-color]="generateRandomPastelColor(checkSlot(slot.start, slot.end, day).code)" [style.border]="'1px solid ' +generateRandomPastelColor(checkSlot(slot.start, slot.end, day).code)">
+                        <div [style.background-color]="generateRandomPastelColor(checkSlot(slot.start, slot.end, day).code)" style="color:white; height: 100%;">{{checkSlot(slot.start, slot.end, day).code}}</div>
+                    </td>
+                    }  @else {
+                        <td style="border:1px solid #e2e8f0;"></td>
+                      }
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>

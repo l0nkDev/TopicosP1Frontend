@@ -17,8 +17,7 @@
         @if (submissionStatus == 'CONNECTING') {
             <div class="spinner-border" style="width: 5rem; height: 5rem;" role="status"></div>
             <p style="margin-top: 1rem; font-size: 1.25rem; font-weight: 500;">Enviando inscripción...</p>
-        } @else {
-          <i class="bi bi-x-square-fill" (click)="closeSubmitDialog()" style="scale: 2; position: absolute; top: 5px; right: 5px;"></i>}
+        } @else {<i class="bi bi-x-square-fill" (click)="closeSubmitDialog()" style="scale: 2; position: absolute; top: 5px; right: 5px;"></i>}
         @if (submissionStatus == 'ACCEPTED' && submissionResponse.value.result.groups.length > 0) {
           <p style="margin-top: 1rem; font-size: 1.25rem; font-weight: 500;">¡Inscripción aceptada!</p>
           <p style="margin-top: 1rem; font-size: 1rem; font-weight: 400;">Grupos inscritos:</p>
@@ -80,23 +79,25 @@
                 <h2 style="font-size:1rem; font-weight:600; margin-bottom:0.5rem; cursor:pointer;">{{subject.code}} |
                   {{subject.title}}</h2>
                 @if (subject.groups.length == 0) {
-                <p style="color:#64748b;">No hay grupos para inscribir</p>
-                } @else {
-                @for (group of subject.groups; track $index) {
-                <div [style.background-color]="isGroupDisabled(group.id, subject) ? 'lightgray' : '#f1f5f9'" style="display:flex; justify-content:space-between; align-items:center; border-radius:0.5rem; padding:0.5rem 1rem; margin-bottom:0.5rem;">
-                  <label style="display: flex; flex-direction: row; padding-right: 0.5rem; border-right: solid lightgray 1px;">
-                    <input [disabled]="isGroupDisabled(group.id, subject)" (change)="updateGroup(group.id, $event.target.checked)" type="checkbox"style="transform:scale(1.2); padding-right:0.5rem;">
-                    {{"&nbsp;&nbsp;" + group.code}}
-                    </label>
-                  <span style="padding-left: 0.5rem; padding-right: 0.5rem;">{{group.teacher.firstName}} {{group.teacher.lastName}}</span>
-                  <span style="text-align: end; padding-left: 0.5rem; padding-right: 0.5rem; border-left: solid lightgrey 1px;">
-                    @for (timeslot of group.timeslots; track $index) {
-                      <div>{{formatDay(timeslot.day)}}: {{formatTime(timeslot.startTime)}}<br>{{formatTime(timeslot.endTime)}}</div>
-                    }
-                  </span>
-                  <span style="text-align: end; padding-left: 0.5rem; border-left: solid lightgrey 1px;">Cupos: {{group.quota}}</span>
+                <div style="display:flex; align-items:center; justify-content: center; border-radius:0.5rem; padding: 0.5rem; background-color: lightgrey;">
+                  <a style="color:#64748b;">No hay grupos para inscribir</a>
                 </div>
-                }
+                } @else {
+                  @for (group of subject.groups; track $index) {
+                    <div [style.background-color]="isGroupDisabled(group.id, subject) ? 'lightgray' : '#f1f5f9'" style="display:flex; justify-content:space-between; align-items:center; border-radius:0.5rem; padding:0.5rem 1rem; margin-bottom:0.5rem;">
+                      <label style="display: flex; flex-direction: row; padding-right: 0.5rem; border-right: solid lightgray 1px;">
+                        <input [disabled]="isGroupDisabled(group.id, subject)" (change)="updateGroup(group.id, $event.target.checked)" type="checkbox"style="padding-right:0.5rem;" class="form-check-input" >
+                        {{"&nbsp;&nbsp;" + group.code}}
+                        </label>
+                      <span style="padding-left: 0.5rem; padding-right: 0.5rem;">{{group.teacher.firstName}} {{group.teacher.lastName}}</span>
+                      <span style="text-align: end; padding-left: 0.5rem; padding-right: 0.5rem; border-left: solid lightgrey 1px;">
+                        @for (timeslot of group.timeslots; track $index) {
+                          <div>{{formatDay(timeslot.day)}}: {{formatTime(timeslot.startTime)}}<br>{{formatTime(timeslot.endTime)}}</div>
+                        }
+                      </span>
+                      <span style="text-align: end; padding-left: 0.5rem; border-left: solid lightgrey 1px;">Cupos: {{group.quota}}</span>
+                    </div>
+                  }
                 }
               </div>
               }
@@ -114,39 +115,6 @@
         }
       }
     </div>
-
-    <div
-      style="flex:1.2; background-color:white; border-radius:1rem; box-shadow:0 2px 6px rgba(0,0,0,0.05); padding:1rem 1.5rem; display:flex; flex-direction:column; justify-content:space-between;">
-      <div>
-        <div class="table-responsive" style="overflow-y: scroll; overflow-x: scroll; max-height: calc(100vh - 200px); min-width: none;">
-          <table class="table" style="text-align:center;">
-            <thead>
-              <tr>
-                <th style="border:1px solid #e2e8f0;">H</th>
-                @for (day of ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa"]; track $index) {
-                  <th style="border:1px solid #e2e8f0;">{{day}}</th>
-                }
-              </tr>
-            </thead>
-            <tbody>
-              @for (slot of TIME_SLOTS; track $index) {
-                <tr>
-                  <td style="border:1px solid #e2e8f0;">{{slot.start}}-{{slot.end}}</td>
-                  @for (day of ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa"]; track $index) {
-                      @if (checkSlot(slot.start, slot.end, day) != null) {
-                    <td [style.background-color]="generateRandomPastelColor(checkSlot(slot.start, slot.end, day).code)" [style.border]="'1px solid ' +generateRandomPastelColor(checkSlot(slot.start, slot.end, day).code)">
-                        <div [style.background-color]="generateRandomPastelColor(checkSlot(slot.start, slot.end, day).code)" style="color:white; height: 100%;">{{checkSlot(slot.start, slot.end, day).code}}</div>
-                    </td>
-                    }  @else {
-                        <td style="border:1px solid #e2e8f0;"></td>
-                      }
-                  }
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+    <app-schedule></app-schedule>
   </div>
 </div>

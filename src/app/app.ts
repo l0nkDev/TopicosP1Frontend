@@ -5,6 +5,7 @@ import { takeWhile } from 'rxjs';
 import { timeout, retry } from 'rxjs/operators';
 import Prando from 'prando';
 import { HistoryComponent } from "./components/history/history";
+import { ScheduleComponent } from "./components/schedule/schedule";
 
 const API_URL = 'http://34.149.69.105/api/';
 
@@ -12,7 +13,7 @@ const API_URL = 'http://34.149.69.105/api/';
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.css',
-  imports: [HistoryComponent]
+  imports: [HistoryComponent, ScheduleComponent]
 })
 export class App implements AfterViewInit{
   @ViewChild(HistoryComponent) historyComponent!: HistoryComponent;
@@ -30,13 +31,6 @@ export class App implements AfterViewInit{
   displayedData: any[] = [];
   searchTerm = '';
   selectedgroups: number[] = [];
-
-  TIME_SLOTS = [{start: '7:00',  end: '7:45' }, {start: '7:45',  end: '8:30' }, {start: '8:30',  end: '9:15' }, {start: '9:15',  end: '10:00'},
-                {start: '10:00', end: '10:45'}, {start: '10:45', end: '11:30'}, {start: '11:30', end: '12:15'}, {start: '12:15', end: '13:00'},
-                {start: '13:00', end: '13:45'}, {start: '13:45', end: '14:30'}, {start: '14:30', end: '15:15'}, {start: '15:15', end: '16:00'},
-                {start: '16:00', end: '16:45'}, {start: '16:45', end: '17:30'}, {start: '17:30', end: '18:15'}, {start: '18:15', end: '19:00'},
-                {start: '19:00', end: '19:45'}, {start: '19:45', end: '20:30'}, {start: '20:30', end: '21:15'}, {start: '21:15', end: '22:00'},
-                {start: '22:00', end: '22:45'}];
 
   ngAfterViewInit(): void {
       this.startPolling();
@@ -143,21 +137,6 @@ export class App implements AfterViewInit{
   updateGroup(id: number, checked: boolean) {
     if (checked) this.selectedgroups.push(id);
     else this.selectedgroups = this.selectedgroups.filter(_ => _ != id);
-  }
-
-  checkSlot(start: string, end: string, day: string): any {
-    for (const group of this.selectedgroups) {
-      const groupData = this.data.flatMap(subject => subject.groups).find((g: any) => g.id === group);
-      if (groupData) {
-        for (const timeslot of groupData.timeslots) {
-          if (this.formatForComparison(timeslot.startTime) <= this.formatForComparison(start) && this.formatForComparison(timeslot.endTime) >= this.formatForComparison(end) && this.formatDay(timeslot.day) === day) {
-            const subject = this.data.find(sub => sub.groups.some((g: any) => g.id === group));
-            return subject;
-          }
-        }
-      }
-    }
-    return null;
   }
 
   updateSearchTerm(term: string) {
