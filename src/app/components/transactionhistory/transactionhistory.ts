@@ -13,8 +13,8 @@ export interface Submission {
 }
 
 @Component({
-  selector: 'app-history',
-  templateUrl: './history.html'
+  selector: 'app-transactionhistory',
+  templateUrl: './transactionhistory.html'
 })
 export class HistoryComponent {
   private http = inject(HttpClient)
@@ -84,7 +84,7 @@ export class HistoryComponent {
             console.log(response.status);
             if (response.result != null)
               if (response.result.statusCode != null)
-                if (response.result.statusCode === 409) {
+                if (response.result.statusCode === 409 && response.error != undefined) {
                   submission.status = 'REJECTED';
                   submission.errortext = "Conflicto de horarios.";
                 }

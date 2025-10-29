@@ -1,4 +1,5 @@
-import { Component } from "@angular/core";
+import { Component, Optional } from "@angular/core";
+import { InscriptionComponent } from "../inscription/inscription";
 
 @Component({
   selector: 'app-schedule',
@@ -6,6 +7,7 @@ import { Component } from "@angular/core";
 })
 
 export class ScheduleComponent {
+  constructor(@Optional() private inscription: InscriptionComponent) {}
 
   TIME_SLOTS = [{start: '7:00',  end: '7:45' }, {start: '7:45',  end: '8:30' }, {start: '8:30',  end: '9:15' }, {start: '9:15',  end: '10:00'},
                 {start: '10:00', end: '10:45'}, {start: '10:45', end: '11:30'}, {start: '11:30', end: '12:15'}, {start: '12:15', end: '13:00'},
@@ -14,24 +16,28 @@ export class ScheduleComponent {
                 {start: '19:00', end: '19:45'}, {start: '19:45', end: '20:30'}, {start: '20:30', end: '21:15'}, {start: '21:15', end: '22:00'},
                 {start: '22:00', end: '22:45'}];
 
+  generateRandomPastelColor(input: string): string {
+    return this.inscription.generateRandomPastelColor(input);
+  }
+
   checkSlot(start: string, end: string, day: string): any {
-    for (const group of this.selectedgroups) {
-      const groupData = this.data.flatMap(subject => subject.groups).find((g: any) => g.id === group);
+    console.log(this.inscription.selectedgroups)
+    const formatForComparison = this.inscription.formatForComparison;
+    const formatDay = this.inscription.formatDay;
+    for (const group of this.inscription.selectedgroups) {
+      const groupData = this.inscription.data.flatMap(subject => subject.groups).find((g: any) => g.id === group);
+      console.log(this.inscription.data);
+      console.log(groupData);
       if (groupData) {
         for (const timeslot of groupData.timeslots) {
-          if (this.formatForComparison(timeslot.startTime) <= this.formatForComparison(start) && this.formatForComparison(timeslot.endTime) >= this.formatForComparison(end) && this.formatDay(timeslot.day) === day) {
-            const subject = this.data.find(sub => sub.groups.some((g: any) => g.id === group));
+          if (formatForComparison(timeslot.startTime) <= formatForComparison(start) && formatForComparison(timeslot.endTime) >= formatForComparison(end) && formatDay(timeslot.day) === day) {
+            const subject = this.inscription.data.find(sub => sub.groups.some((g: any) => g.id === group));
             return subject;
           }
         }
       }
     }
     return null;
-  }
-
-  formatForComparison(time: string): number {
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
   }
 
 }
