@@ -1,8 +1,7 @@
+import { Capacitor } from '@Capacitor/core';
 import { Component, inject, OnInit, ViewChild} from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { NavbarComponent } from "./components/navbar/navbar";
-
-const API_URL = 'http://34.149.69.105/api/';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +16,7 @@ export class App implements OnInit{
   public historydata: any[] = [];
   public availabledata: any[] = [];
   public selectedgroups: number[] = [];
+  public platform = Capacitor.getPlatform();
 
   ngOnInit(): void {
       if (this.token == null) this.router.navigate(['login'])

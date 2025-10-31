@@ -1,7 +1,8 @@
 import { HttpClient } from "@angular/common/http";
-import { Component, inject } from "@angular/core";
+import { Component, inject, Optional } from "@angular/core";
 import { retry, timeout } from "rxjs";
 import { environment } from "../../../environments/environment.development";
+import { NavbarComponent } from "../navbar/navbar";
 
 export interface Submission {
   token: string;
@@ -16,6 +17,7 @@ export interface Submission {
   templateUrl: './transactionhistory.html'
 })
 export class HistoryComponent {
+  constructor(@Optional() public navbar: NavbarComponent) {}
   private http = inject(HttpClient)
   submissions: any[] = [];
   expanded = false;
