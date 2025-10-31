@@ -21,17 +21,17 @@ export class ScheduleComponent {
   }
 
   checkSlot(start: string, end: string, day: string): any {
-    console.log(this.inscription.selectedgroups)
+    console.log(this.inscription.app.selectedgroups)
     const formatForComparison = this.inscription.formatForComparison;
     const formatDay = this.inscription.formatDay;
-    for (const group of this.inscription.selectedgroups) {
-      const groupData = this.inscription.data.flatMap(subject => subject.groups).find((g: any) => g.id === group);
-      console.log(this.inscription.data);
+    for (const group of this.inscription.app.selectedgroups) {
+      const groupData = this.inscription.app.availabledata.flatMap(subject => subject.groups).find((g: any) => g.id === group);
+      console.log(this.inscription.app.availabledata);
       console.log(groupData);
       if (groupData) {
         for (const timeslot of groupData.timeslots) {
           if (formatForComparison(timeslot.startTime) <= formatForComparison(start) && formatForComparison(timeslot.endTime) >= formatForComparison(end) && formatDay(timeslot.day) === day) {
-            const subject = this.inscription.data.find(sub => sub.groups.some((g: any) => g.id === group));
+            const subject = this.inscription.app.availabledata.find(sub => sub.groups.some((g: any) => g.id === group));
             return subject;
           }
         }

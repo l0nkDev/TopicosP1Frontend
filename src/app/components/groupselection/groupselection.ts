@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, inject, Optional } from "@angular/core";
+import { Component, inject, OnInit, Optional } from "@angular/core";
 import { InscriptionComponent } from "../inscription/inscription";
 import { retry, takeWhile, timeout } from "rxjs";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
@@ -10,7 +10,7 @@ import { environment } from "../../../environments/environment.development";
   templateUrl: './groupselection.html'
 })
 
-export class GroupSelectionComponent implements AfterViewInit{
+export class GroupSelectionComponent implements OnInit{
   constructor(@Optional() public inscription: InscriptionComponent) {}
 
   showingSubmitDialog = false;
@@ -25,22 +25,23 @@ export class GroupSelectionComponent implements AfterViewInit{
   private http = inject(HttpClient)
   private polling = inject(PollingService)
 
-  ngAfterViewInit(): void {
-      this.startPolling();
+  ngOnInit(): void {
+      if (this.inscription.app.availabledata.length === 0) this.startPolling();
+      else this.updateSearchTerm(this.searchTerm);
   }
 
 
   updateGroup(id: number, checked: boolean) {
-    if (checked) this.inscription.selectedgroups.push(id);
-    else this.inscription.selectedgroups = this.inscription.selectedgroups.filter(_ => _ != id);
+    if (checked) this.inscription.app.selectedgroups.push(id);
+    else this.inscription.app.selectedgroups = this.inscription.app.selectedgroups.filter(_ => _ != id);
   }
 
   updateSearchTerm(term: string) {
     this.searchTerm = term.toLowerCase();
     if (this.searchTerm === '') {
-      this.displayedData = this.inscription.data;
+      this.displayedData = this.inscription.app.availabledata;
     } else {
-      this.displayedData = this.inscription.data.filter(subject =>
+      this.displayedData = this.inscription.app.availabledata.filter(subject =>
         subject.title.toLowerCase().includes(this.searchTerm) ||
         subject.code.toLowerCase().includes(this.searchTerm)
       );
@@ -57,19 +58,19 @@ export class GroupSelectionComponent implements AfterViewInit{
 
     closeSubmitDialog() {
     this.showingSubmitDialog = false;
-    this.inscription.data = [];
+    this.inscription.app.availabledata = [];
     this.displayedData = [];
     this.statustext = '';
     this.startPolling();
   }
 
   isGroupDisabled(id: number, subject: any): boolean {
-  if (this.inscription.selectedgroups.includes(id)) return false;
-  const procgroup = this.inscription.data.flatMap(subject => subject.groups).find((g: any) => g.id === id);
-  if (subject.groups.some((g: any) => this.inscription.selectedgroups.includes(g.id))) return true;
+  if (this.inscription.app.selectedgroups.includes(id)) return false;
+  const procgroup = this.inscription.app.availabledata.flatMap(subject => subject.groups).find((g: any) => g.id === id);
+  if (subject.groups.some((g: any) => this.inscription.app.selectedgroups.includes(g.id))) return true;
   const timeslots = [];
-  for (const gid of this.inscription.selectedgroups) {
-    timeslots.push(...this.inscription.data.flatMap(subject => subject.groups).find((g: any) => g.id === gid)?.timeslots || []);
+  for (const gid of this.inscription.app.selectedgroups) {
+    timeslots.push(...this.inscription.app.availabledata.flatMap(subject => subject.groups).find((g: any) => g.id === gid)?.timeslots || []);
   }
   for (const slot of procgroup.timeslots) {
     for (const selected of timeslots) {
@@ -85,7 +86,7 @@ export class GroupSelectionComponent implements AfterViewInit{
 }
 
   startPolling(): void {
-    this.inscription.selectedgroups = [];
+    this.inscription.app.selectedgroups = [];
     this.isGetButtonDisabled = true;
     var token = '';
     var finished = false;
@@ -104,18 +105,18 @@ export class GroupSelectionComponent implements AfterViewInit{
           }
           return;
         }
-        this.inscription.data = [];
+        this.inscription.app.availabledata = [];
         this.displayedData = [];
         this.polling.pollData(`${environment.API_URL}Students/Status/${token}`, 2000)
         .pipe(takeWhile(_ => !finished))
         .subscribe(
           (response: any) => {
-            this.inscription.data = response;
+            this.inscription.app.availabledata = response;
             this.statustext = response.status;
             if (response.status !== 'PENDING') {
               if (response.status === 'ACCEPTED') {
-                this.inscription.data = response.result;
-                this.displayedData = this.inscription.data;
+                this.inscription.app.availabledata = response.result;
+                this.displayedData = this.inscription.app.availabledata;
                 this.updateSearchTerm(this.searchTerm);
             }
               this.isGetButtonDisabled = false;
@@ -124,7 +125,7 @@ export class GroupSelectionComponent implements AfterViewInit{
           },
           (error: any) => {
             this.statustext = 'ERROR';
-            this.inscription.data = [];
+            this.inscription.app.availabledata = [];
             this.isGetButtonDisabled = false;
             finished = true;
           }
@@ -132,7 +133,7 @@ export class GroupSelectionComponent implements AfterViewInit{
       },
       (_) => {
         this.statustext = 'ERROR';
-        this.inscription.data = [];
+        this.inscription.app.availabledata = [];
         this.isGetButtonDisabled = false;
         finished = true;
       }
@@ -151,7 +152,7 @@ export class GroupSelectionComponent implements AfterViewInit{
       "period": 2,
       "gestion": 2025,
       "type": 0,
-      "groupIds": this.inscription.selectedgroups
+      "groupIds": this.inscription.app.selectedgroups
     };
     (payload as any).requestId = await sha256HashBrowser(JSON.stringify(payload));
     this.http.post(`${environment.API_URL}Inscriptions/self`, payload,
@@ -167,13 +168,13 @@ export class GroupSelectionComponent implements AfterViewInit{
         this.submissionStatus = response.status;
         this.isPostButtonDisabled = false;
         let groups = '';
-        for (const groupId of this.inscription.selectedgroups) {
-          const group = this.inscription.data.flatMap(subject => subject.groups).find((g: any) => g.id === groupId);
+        for (const groupId of this.inscription.app.selectedgroups) {
+          const group = this.inscription.app.availabledata.flatMap(subject => subject.groups).find((g: any) => g.id === groupId);
           if (group) {
             groups += `${group.subject.code}-${group.code}, `;
           }
         }
-        this.inscription.historyComponent.addSubmission({token: token, status: 'PENDING', timestamp: new Date().toLocaleString(), details: groups.slice(0, -2)});
+        this.inscription.app.navbar.historyComponent.addSubmission({token: token, status: 'PENDING', timestamp: new Date().toLocaleString(), details: groups.slice(0, -2)});
       },
       (_) => {
         this.submissionStatus = 'ERROR';

@@ -1,25 +1,20 @@
-import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, Component, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { PollingService } from '../../polling-service';
-import { takeWhile } from 'rxjs';
-import { timeout, retry } from 'rxjs/operators';
+import { Component, inject, OnInit, Optional, signal, ViewChild } from '@angular/core';
 import Prando from 'prando';
 import { HistoryComponent } from "../transactionhistory/transactionhistory";
 import { GroupSelectionComponent } from "../groupselection/groupselection";
 import { ScheduleComponent } from "../schedule/schedule";
 import { Router } from '@angular/router';
+import { App } from '../../app';
 
 @Component({
   selector: 'app-inscription',
   templateUrl: './inscription.html',
-  imports: [GroupSelectionComponent, HistoryComponent, ScheduleComponent],
+  imports: [GroupSelectionComponent, ScheduleComponent],
 })
 export class InscriptionComponent implements OnInit{
-  @ViewChild(HistoryComponent) historyComponent!: HistoryComponent;
+  constructor(@Optional() public app: App) {}
   private router = inject(Router);
   protected readonly title = signal('TopicosP1Frontend');
-  selectedgroups: number[] = [];
-  data: any[] = [];
   token = sessionStorage.getItem('token');
 
   ngOnInit(): void {
@@ -57,10 +52,5 @@ export class InscriptionComponent implements OnInit{
     const saturation = Math.floor(hash * 31) + 40;
     const lightness = Math.floor(hash * 21) + 70;
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-  }
-
-  logout() {
-    sessionStorage.removeItem('token');
-    this.router.navigate(['login'])
   }
 }

@@ -1,10 +1,18 @@
-<div style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-  <div class="card">
+<div style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 3rem">
+  <img src="UAGRM_Header.png" width="400vw">
+  <div class="card text-center">
+    <h6 class="card-header" style="padding: 1rem;">Inicio de sesión</h6>
     <div class="card-body" style="padding: 3rem;  display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 1rem;">
-      <h3>Iniciar sesión</h3>
-      <input #login class="form-control" placeholder="Registro" type="text">
-      <input #pass class="form-control" placeholder="Contraseña" type="password">
-      <button (click)="sendlogin(login.value, pass.value)" class="btn btn-primary" [disabled]="false">Enviar</button>
+      <input [(ngModel)]="login" class="form-control" placeholder="Registro" type="text">
+      <input [(ngModel)]="pass" class="form-control" placeholder="Contraseña" type="password">
+      <button (click)="sendlogin()" class="btn btn-primary" [disabled]="login.length <= 0 || pass.length <= 0 || sending">
+        @if (!sending) {
+          Enviar
+        }
+        @else {
+          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        }
+      </button>
     </div>
   </div>
 </div>

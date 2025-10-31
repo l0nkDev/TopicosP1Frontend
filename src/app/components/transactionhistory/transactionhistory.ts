@@ -1,8 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Component, inject } from "@angular/core";
 import { retry, timeout } from "rxjs";
-
-const API_URL = 'http://34.149.69.105/api/';
+import { environment } from "../../../environments/environment.development";
 
 export interface Submission {
   token: string;
@@ -75,7 +74,7 @@ export class HistoryComponent {
     if (submission) {
       submission.errortext = '';
       submission.refreshing = true;
-      this.http.get(`${API_URL}Inscriptions/Status/${submission.token}`)
+      this.http.get(`${environment.API_URL}Inscriptions/Status/${submission.token}`)
           .pipe(timeout(10000), retry(2))
           .subscribe((response: any) => {
             console.log(response);

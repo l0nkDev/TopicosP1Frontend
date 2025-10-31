@@ -1,0 +1,26 @@
+<nav class="navbar navbar-expand-sm fixed-top navbar-light" style="background-color:white; border-bottom: 1px solid lightgrey;">
+  <div class="container-fluid">
+    <a class="navbar-brand" (click)="router.navigate([''])">
+      <img src="UAGRM_Logo.png" alt="Logo" height="30" class="d-inline-block align-text-top">
+    </a>
+    <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" (click)="router.navigate(['inscription'])">Inscripción</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"  (click)="router.navigate(['history'])">Histórico</a>
+        </li>
+      </ul>
+    </div>
+    <div style="display: flex; flex-direction: row; align-items: center; justify-content: end; flex-grow: 3;">
+      <div style="display: flex; gap: 3rem; color: #1e293b; margin-right: 2rem;">
+        <app-transactionhistory></app-transactionhistory>
+        <i class="bi bi-box-arrow-right" (click)="logout()"></i>
+      </div>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </div>
+</nav>

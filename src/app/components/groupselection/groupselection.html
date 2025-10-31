@@ -27,7 +27,7 @@
   }
   @if (submissionStatus == 'PENDING') {
     <p style="margin-top: 1rem; font-size: 1.25rem; font-weight: 500;">¡Inscripción enviada!</p>
-    <p style="margin-top: 1rem; font-size: 1rem; font-weight: 400;">Puedes revisar tus inscripciones pendientes <b><u (click)="inscription.historyComponent.expand()">aquí.</u></b></p>
+    <p style="margin-top: 1rem; font-size: 1rem; font-weight: 400;">Puedes revisar tus inscripciones pendientes <b><u (click)="inscription.app.navbar.historyComponent.expand()">aquí.</u></b></p>
   }
   @if (submissionStatus == 'ERROR') {
     <p style="margin-top: 1rem; font-size: 1.25rem; font-weight: 500;">No se puede conectar al servidor.</p>
@@ -35,7 +35,7 @@
   }
   </div>
 } @else {
-  @if (inscription.data.length == 0) {
+  @if (inscription.app.availabledata.length == 0) {
   <div
     style="width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
     @if (statustext == 'PENDING' || statustext == 'CONNECTING') {
@@ -73,7 +73,7 @@
               @let isdisabled = isGroupDisabled(group.id, subject);
               <div [style.background-color]="isdisabled ? 'lightgray' : '#f1f5f9'" style="display:flex; justify-content:space-between; align-items:center; border-radius:0.5rem; padding:0.5rem 1rem; margin-bottom:0.5rem;">
                 <label style="display: flex; flex-direction: row; padding-right: 0.5rem; border-right: solid lightgray 1px;">
-                  <input [disabled]="isdisabled" (change)="updateGroup(group.id, $event.target.checked)" type="checkbox"style="padding-right:0.5rem;" class="form-check-input" >
+                  <input [disabled]="isdisabled" [checked]="inscription.app.selectedgroups.includes(group.id)" (change)="updateGroup(group.id, $event.target.checked)" type="checkbox"style="padding-right:0.5rem;" class="form-check-input" >
                   {{"&nbsp;&nbsp;" + group.code}}
                   </label>
                 <span style="padding-left: 0.5rem; padding-right: 0.5rem;">{{group.teacher.firstName}} {{group.teacher.lastName}}</span>
@@ -93,9 +93,9 @@
     <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%; margin-top: 1rem;">
       <div class="form-check form-check-inline">
         <input class="form-check-input" type="checkbox" (change)="toggleEmptySubjects($event.target.checked)" />
-        <label class="form-check-label">Materias inelegibles</label>
+        <label class="form-check-label">Materias sin grupos</label>
       </div>
-    <button (click)="startSubmitPolling()" class="btn btn-primary" [disabled]="inscription.selectedgroups.length == 0 || isPostButtonDisabled"
+    <button (click)="startSubmitPolling()" class="btn btn-primary" [disabled]="inscription.app.selectedgroups.length == 0 || isPostButtonDisabled"
       style="color:white; border:none; border-radius:0.5rem; padding:0.75rem 1.5rem; cursor:pointer; font-size:1rem; font-weight:500;">Registrar</button>
     </div>
   </div>

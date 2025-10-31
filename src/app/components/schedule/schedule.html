@@ -1,9 +1,9 @@
 
 <div>
-  <div class="table-responsive" style="overflow-y: scroll; overflow-x: scroll; max-height: calc(100vh - 200px); min-width: none;">
+  <div class="table-responsive" style="overflow-y: scroll; overflow-x: scroll; max-height: calc(100vh - 150px); min-width: none;">
     <table class="table" style="text-align:center;">
       <thead>
-        <tr>
+        <tr style=" position: sticky; top: 0px; border-bottom: 1px solid; max-width: 8rem;">
           <th style="border:1px solid #e2e8f0;">H</th>
           @for (day of ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa"]; track $index) {
             <th style="border:1px solid #e2e8f0;">{{day}}</th>
@@ -13,13 +13,13 @@
       <tbody>
         @for (slot of TIME_SLOTS; track $index) {
           <tr>
-            <td style="border:1px solid #e2e8f0;">{{slot.start}}-{{slot.end}}</td>
+            <td style="border:1px solid #e2e8f0; width: 8rem;">{{slot.start}}-{{slot.end}}</td>
             @for (day of ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa"]; track $index) {
                 @let sub = checkSlot(slot.start, slot.end, day);
                 @if (sub != null) {
                   @let col = generateRandomPastelColor(sub.code);
                   <td [style.background-color]="col" [style.border]="'1px solid ' + col">
-                      <div [style.background-color]="col" style="color:white; height: 100%;">{{sub.code}}</div>
+                      <div [style.background-color]="col" style="color:white; height: 100%;"><a>{{sub.code}}</a></div>
                   </td>
               }  @else {
                   <td style="border:1px solid #e2e8f0;"></td>
