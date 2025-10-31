@@ -20,7 +20,12 @@
             <table class="table table-responsive table-bordered">
               <thead style="position: sticky; top: 0px;">
                 <tr>
-                  <th>Codigo</th>
+                  <th style="width: 20px;">
+                    <button (click)="startPolling()" class="btn btn-outline-secondary">
+                      <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+                  </th>
+                  <th style="width: 50px">Codigo</th>
                   <th>Titulo</th>
                   <th>Nota</th>
                 </tr>
@@ -28,7 +33,7 @@
               <tbody>
                 @for (subject of data; track $index) {
                   <tr [class]="subject.status == 0 ? 'table-secondary' : ''">
-                    <td>{{subject.code}}</td>
+                    <td colspan ="2">{{subject.code}}</td>
                     <td>{{subject.title}}</td>
                     <td [class]="subject.status == 1 ? subject.grade >= 51 ? 'table-success' : 'table-danger' : ''">
                       {{subject.status == 1 ? subject.grade : subject.grade == 0 ? 'INS' : `${subject.grade} (INS)` }}
